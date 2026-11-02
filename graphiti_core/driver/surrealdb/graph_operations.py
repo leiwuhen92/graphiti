@@ -105,6 +105,7 @@ class SurrealDBGraphOperationsInterface(GraphOperationsInterface):
         raise TypeError(f"Unsupported node type: {type(node).__name__}")
 
     async def node_delete(self, node: Any, driver: Any) -> None:
+        if isinstance(node, EpisodicNode): return await driver.episode_node_ops.delete(driver, node)
         if isinstance(node, EntityNode): return await driver.entity_node_ops.delete(driver, node)
         if isinstance(node, CommunityNode): return await driver.community_node_ops.delete(driver, node)
         if isinstance(node, SagaNode): return await driver.saga_node_ops.delete(driver, node)
@@ -153,6 +154,10 @@ class SurrealDBGraphOperationsInterface(GraphOperationsInterface):
         return await driver.entity_edge_ops.save(driver, edge)
 
     async def edge_delete(self, edge: Any, driver: Any):
+        if isinstance(edge, EpisodicEdge): return await driver.episodic_edge_ops.delete(driver, edge)
+        if isinstance(edge, CommunityEdge): return await driver.community_edge_ops.delete(driver, edge)
+        if isinstance(edge, HasEpisodeEdge): return await driver.has_episode_edge_ops.delete(driver, edge)
+        if isinstance(edge, NextEpisodeEdge): return await driver.next_episode_edge_ops.delete(driver, edge)
         return await driver.entity_edge_ops.delete(driver, edge)
 
     async def edge_get_by_uuid(self, _cls: Any, driver: Any, uuid: str):
