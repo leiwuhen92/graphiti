@@ -14,6 +14,41 @@ from graphiti_core.edges import EntityEdge, EpisodicEdge, CommunityEdge, HasEpis
 
 
 class SurrealDBGraphOperationsInterface(GraphOperationsInterface):
+
+    async def node_get_by_names(self, _cls: Any, driver: Any, names: list[str], group_ids: list[str]):
+        records, _, _ = await driver.execute_query(
+            "SELECT * FROM entity_node WHERE name IN $names AND group_id IN $groups",
+            params={"names": names, "groups": group_ids},
+        )
+        return [EntityNode.model_validate(row) for row in records]
+
+    async def node_get_by_attribute_values(self, _cls: Any, driver: Any, group_id: str, attributes: dict[str, Any], node_labels: list[str] | None = None, limit: int = 100):
+        nodes = await driver.entity_node_ops.get_by_group_ids(driver, [group_id], limit)
+        return [node for node in nodes if all((node.attributes or {}).get(k) == v for k, v in attributes.items()) and (node_labels is None or set(node_labels).issubset(set(node.labels)))]
+
+    async def episodic_node_get_by_entity_node_uuid(self, _cls: Any, driver: Any, entity_node_uuid: str):
+        return await driver.episode_node_ops.get_by_entity_node_uuid(driver, entity_node_uuid)
+
+    async def get_mentioned_nodes(self, driver: Any, episodes: list[Any]):
+        episode_ids = [episode.uuid for episode in episodes]
+        if not episode_ids:
+            return []
+        records, _, _ = await driver.execute_query(
+            "SELECT target_node_uuid FROM episodic_edge WHERE source_node_uuid IN $episode_ids",
+            params={"episode_ids": episode_ids},
+        )
+        uuids = list({row["target_node_uuid"] for row in records if row.get("target_node_uuid")})
+        return await driver.entity_node_ops.get_by_uuids(driver, uuids)
+
+    async def episodic_node_save_bulk(self, _cls: Any, driver: Any, transaction: Any, nodes: list[Any], batch_size: int = 100):
+        await driver.episode_node_ops.save_bulk(driver, nodes, transaction, batch_size)
+
+    async def episodic_edge_save_bulk(self, _cls: Any, driver: Any, transaction: Any, episodic_edges: list[Any], batch_size: int = 100):
+        await driver.episodic_edge_ops.save_bulk(driver, episodic_edges, transaction, batch_size)
+
+    async def edge_save_bulk(self, _cls: Any, driver: Any, transaction: Any, edges: list[Any], batch_size: int = 100):
+        await driver.entity_edge_ops.save_bulk(driver, edges, transaction, batch_size)
+
     async def node_save(self, node: Any, driver: Any) -> None:
         if isinstance(node, EntityNode): return await driver.entity_node_ops.save(driver, node)
         if isinstance(node, CommunityNode): return await driver.community_node_ops.save(driver, node)
