@@ -54,8 +54,10 @@ class SurrealDBSession(GraphDriverSession):
     async def run(self, query: str, **kwargs: Any) -> Any:
         if self._closed:
             raise RuntimeError("SurrealDB session is closed")
-        params = kwargs.pop("params", kwargs)
-        return await self._driver.execute_query(query, params=params, **kwargs)
+        params = kwargs.pop("params", None)
+        if params is None:
+            params = kwargs
+        return await self._driver.execute_query(query, params=params)
 
     async def execute_write(self, func, *args, **kwargs):
         return await func(self, *args, **kwargs)
