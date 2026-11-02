@@ -28,7 +28,7 @@ class _NodeOps:
     def _data(self, node: Any) -> dict[str, Any]:
         data = node.model_dump(mode="python")
         if isinstance(node, EntityNode):
-            data.update(node.attributes or {})
+            data["attributes"] = node.attributes or {}
             data["labels"] = list(set(node.labels + ["Entity"]))
         if isinstance(node, EpisodicNode):
             data["source"] = node.source.value
