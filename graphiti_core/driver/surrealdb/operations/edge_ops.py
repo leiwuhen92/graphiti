@@ -58,6 +58,6 @@ class SurrealDBEpisodicEdgeOperations(_Ops):
 class SurrealDBCommunityEdgeOperations(_Ops):
     table, model = "community_edge", CommunityEdge
 class SurrealDBHasEpisodeEdgeOperations(_Ops):
-    table, model = HasEpisodeEdge
+    table, model = "has_episode_edge", HasEpisodeEdge
 class SurrealDBNextEpisodeEdgeOperations(_Ops):
-    table, model = NextEpisodeEdge
+    table, model = "next_episode_edge", NextEpisodeEdge
