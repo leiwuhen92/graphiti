@@ -20,26 +20,35 @@ TABLES = (
     "next_episode_edge",
 )
 
+INDEXES = tuple(
+    (table, f"{table}_uuid", "uuid", True) for table in TABLES
+) + tuple(
+    (table, f"{table}_group_id", "group_id", False)
+    for table in TABLES
+    if table.endswith("_node") or table == "entity_edge"
+)
+
 
 async def ensure_schema(driver: SurrealDBDriver, delete_existing: bool = False) -> None:
-    """Create schemaless record tables and lookup indexes.
+    """Create schemaless record tables and deterministic lookup indexes.
 
-    The first implementation intentionally avoids a fixed vector dimension:
-    Graphiti embedding dimensions are selected by the configured embedder. Vector
-    indexes must be added once that dimension is known.
+    Vector indexes are intentionally not declared here: their dimension must
+    match the configured embedder and cannot safely be guessed by a driver.
     """
     if delete_existing:
-        for table in TABLES:
-            await driver.execute_query(f"REMOVE TABLE IF EXISTS {table}")
+        for table, index_name, _, _ in INDEXES:
+            await driver.execute_query(
+                f"REMOVE INDEX IF EXISTS {index_name} ON TABLE {table}"
+            )
 
     statements: list[str] = []
     for table in TABLES:
         statements.append(f"DEFINE TABLE IF NOT EXISTS {table} SCHEMALESS")
+    for table, index_name, field, unique in INDEXES:
+        unique_clause = " UNIQUE" if unique else ""
         statements.append(
-            f"DEFINE INDEX IF NOT EXISTS {table}_uuid ON TABLE {table} FIELDS uuid UNIQUE"
-        )
-        statements.append(
-            f"DEFINE INDEX IF NOT EXISTS {table}_group_id ON TABLE {table} FIELDS group_id"
+            f"DEFINE INDEX IF NOT EXISTS {index_name} ON TABLE {table} "
+            f"FIELDS {field}{unique_clause}"
         )
 
     await driver.execute_query(";".join(statements))
