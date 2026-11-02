@@ -15,6 +15,55 @@ from graphiti_core.edges import EntityEdge, EpisodicEdge, CommunityEdge, HasEpis
 
 class SurrealDBGraphOperationsInterface(GraphOperationsInterface):
 
+
+    async def node_get_by_group_ids(self, _cls: Any, driver: Any, group_ids: list[str], limit: int | None = None, uuid_cursor: str | None = None):
+        return await driver.entity_node_ops.get_by_group_ids(driver, group_ids, limit, uuid_cursor)
+
+    async def community_node_get_by_uuids(self, _cls: Any, driver: Any, uuids: list[str]):
+        return await driver.community_node_ops.get_by_uuids(driver, uuids)
+
+    async def community_node_get_by_group_ids(self, _cls: Any, driver: Any, group_ids: list[str], limit: int | None = None, uuid_cursor: str | None = None):
+        return await driver.community_node_ops.get_by_group_ids(driver, group_ids, limit, uuid_cursor)
+
+    async def saga_node_get_by_uuid(self, _cls: Any, driver: Any, uuid: str):
+        return await driver.saga_node_ops.get_by_uuid(driver, uuid)
+
+    async def saga_node_get_by_uuids(self, _cls: Any, driver: Any, uuids: list[str]):
+        return await driver.saga_node_ops.get_by_uuids(driver, uuids)
+
+    async def saga_node_get_by_group_ids(self, _cls: Any, driver: Any, group_ids: list[str], limit: int | None = None, uuid_cursor: str | None = None):
+        return await driver.saga_node_ops.get_by_group_ids(driver, group_ids, limit, uuid_cursor)
+
+    async def episodic_edge_get_by_group_ids(self, _cls: Any, driver: Any, group_ids: list[str], limit: int | None = None, uuid_cursor: str | None = None):
+        return await driver.episodic_edge_ops.get_by_group_ids(driver, group_ids, limit, uuid_cursor)
+
+    async def community_edge_get_by_uuid(self, _cls: Any, driver: Any, uuid: str):
+        return await driver.community_edge_ops.get_by_uuid(driver, uuid)
+
+    async def community_edge_get_by_uuids(self, _cls: Any, driver: Any, uuids: list[str]):
+        return await driver.community_edge_ops.get_by_uuids(driver, uuids)
+
+    async def community_edge_get_by_group_ids(self, _cls: Any, driver: Any, group_ids: list[str], limit: int | None = None, uuid_cursor: str | None = None):
+        return await driver.community_edge_ops.get_by_group_ids(driver, group_ids, limit, uuid_cursor)
+
+    async def community_edge_delete(self, edge: CommunityEdge, driver: Any):
+        return await driver.community_edge_ops.delete(driver, edge)
+
+    async def community_edge_delete_by_uuids(self, _cls: Any, driver: Any, uuids: list[str]):
+        return await driver.community_edge_ops.delete_by_uuids(driver, uuids)
+
+    async def has_episode_edge_delete(self, edge: HasEpisodeEdge, driver: Any):
+        return await driver.has_episode_edge_ops.delete(driver, edge)
+
+    async def has_episode_edge_save_bulk(self, _cls: Any, driver: Any, transaction: Any, edges: list[Any], batch_size: int = 100):
+        await driver.has_episode_edge_ops.save_bulk(driver, edges, transaction, batch_size)
+
+    async def next_episode_edge_delete(self, edge: NextEpisodeEdge, driver: Any):
+        return await driver.next_episode_edge_ops.delete(driver, edge)
+
+    async def next_episode_edge_save_bulk(self, _cls: Any, driver: Any, transaction: Any, edges: list[Any], batch_size: int = 100):
+        await driver.next_episode_edge_ops.save_bulk(driver, edges, transaction, batch_size)
+
     async def node_get_by_names(self, _cls: Any, driver: Any, names: list[str], group_ids: list[str]):
         records, _, _ = await driver.execute_query(
             "SELECT * FROM entity_node WHERE name IN $names AND group_id IN $groups",
