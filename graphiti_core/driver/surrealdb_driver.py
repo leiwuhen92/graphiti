@@ -21,6 +21,8 @@ from graphiti_core.driver.surrealdb.operations.edge_ops import (
 )
 from graphiti_core.driver.operations.episode_node_ops import EpisodeNodeOperations
 from graphiti_core.driver.operations.saga_node_ops import SagaNodeOperations
+from graphiti_core.driver.surrealdb.graph_operations import SurrealDBGraphOperationsInterface
+from graphiti_core.driver.surrealdb.search_interface import SurrealDBSearchInterface
 from graphiti_core.driver.surrealdb.operations.node_ops import (
     SurrealDBCommunityNodeOperations,
     SurrealDBEntityNodeOperations,
@@ -97,6 +99,8 @@ class SurrealDBDriver(GraphDriver):
         self._community_edge_ops = SurrealDBCommunityEdgeOperations()
         self._has_episode_edge_ops = SurrealDBHasEpisodeEdgeOperations()
         self._next_episode_edge_ops = SurrealDBNextEpisodeEdgeOperations()
+        self.graph_operations_interface = SurrealDBGraphOperationsInterface()
+        self.search_interface = SurrealDBSearchInterface()
 
     @property
     def entity_node_ops(self) -> EntityNodeOperations:
