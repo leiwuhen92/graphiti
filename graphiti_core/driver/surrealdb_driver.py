@@ -168,7 +168,7 @@ class SurrealDBDriver(GraphDriver):
         if kwargs:
             unexpected = ", ".join(sorted(kwargs))
             raise TypeError(f"Unsupported SurrealDB query options: {unexpected}")
-        raw = await self.client.query(cypher_query_, vars=params)
+        raw = await self.client.query_raw(cypher_query_, params)
         records: list[dict[str, Any]] = []
         if isinstance(raw, dict) and "result" in raw:
             statements = raw["result"]
