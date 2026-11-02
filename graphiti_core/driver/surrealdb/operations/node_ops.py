@@ -127,12 +127,13 @@ class SurrealDBEpisodeNodeOperations(_NodeOps):
     async def get_by_entity_node_uuid(
         self, executor: QueryExecutor, entity_node_uuid: str
     ) -> list[EpisodicNode]:
-        records = await _execute(
+        mentions = await _execute(
             executor,
-            "SELECT * FROM episodic_node WHERE $entity_uuid IN entity_edges",
+            "SELECT source_node_uuid FROM episodic_edge WHERE target_node_uuid = $entity_uuid",
             {"entity_uuid": entity_node_uuid},
         )
-        return [EpisodicNode.model_validate(row) for row in records]
+        episode_uuids = list({row["source_node_uuid"] for row in mentions if row.get("source_node_uuid")})
+        return await self.get_by_uuids(executor, episode_uuids)
 
     async def retrieve_episodes(
         self, executor: QueryExecutor, reference_time: datetime, last_n: int = 3,
@@ -146,7 +147,7 @@ class SurrealDBEpisodeNodeOperations(_NodeOps):
             params["group_ids"] = group_ids
         if source is not None:
             query += " AND source = $source"
-            params["source"] = source
+            params["source"] = source.value if hasattr(source, "value") else source
         if saga is not None:
             query += " AND saga = $saga"
             params["saga"] = saga
