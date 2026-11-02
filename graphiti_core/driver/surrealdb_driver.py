@@ -7,6 +7,16 @@ from collections.abc import Coroutine
 from typing import Any
 
 from graphiti_core.driver.driver import GraphDriver, GraphDriverSession, GraphProvider
+from graphiti_core.driver.operations.community_node_ops import CommunityNodeOperations
+from graphiti_core.driver.operations.entity_node_ops import EntityNodeOperations
+from graphiti_core.driver.operations.episode_node_ops import EpisodeNodeOperations
+from graphiti_core.driver.operations.saga_node_ops import SagaNodeOperations
+from graphiti_core.driver.surrealdb.operations.node_ops import (
+    SurrealDBCommunityNodeOperations,
+    SurrealDBEntityNodeOperations,
+    SurrealDBEpisodeNodeOperations,
+    SurrealDBSagaNodeOperations,
+)
 
 
 def _load_surreal_factory():
@@ -68,6 +78,26 @@ class SurrealDBDriver(GraphDriver):
         self._connect_lock = asyncio.Lock()
         self._connected = False
         self._closed = False
+        self._entity_node_ops = SurrealDBEntityNodeOperations()
+        self._episode_node_ops = SurrealDBEpisodeNodeOperations()
+        self._community_node_ops = SurrealDBCommunityNodeOperations()
+        self._saga_node_ops = SurrealDBSagaNodeOperations()
+
+    @property
+    def entity_node_ops(self) -> EntityNodeOperations:
+        return self._entity_node_ops
+
+    @property
+    def episode_node_ops(self) -> EpisodeNodeOperations:
+        return self._episode_node_ops
+
+    @property
+    def community_node_ops(self) -> CommunityNodeOperations:
+        return self._community_node_ops
+
+    @property
+    def saga_node_ops(self) -> SagaNodeOperations:
+        return self._saga_node_ops
 
     async def _ensure_connected(self) -> None:
         if self._closed:
@@ -98,7 +128,7 @@ class SurrealDBDriver(GraphDriver):
         if kwargs:
             unexpected = ", ".join(sorted(kwargs))
             raise TypeError(f"Unsupported SurrealDB query options: {unexpected}")
-        raw = await self.client.query(cypher_query_, params)
+        raw = await self.client.query(cypher_query_, vars=params)
         records: list[dict[str, Any]] = []
         if isinstance(raw, dict) and "result" in raw:
             statements = raw["result"]
