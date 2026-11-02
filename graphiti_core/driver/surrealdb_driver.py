@@ -9,6 +9,16 @@ from typing import Any
 from graphiti_core.driver.driver import GraphDriver, GraphDriverSession, GraphProvider
 from graphiti_core.driver.operations.community_node_ops import CommunityNodeOperations
 from graphiti_core.driver.operations.entity_node_ops import EntityNodeOperations
+from graphiti_core.driver.operations.entity_edge_ops import EntityEdgeOperations
+from graphiti_core.driver.operations.episodic_edge_ops import EpisodicEdgeOperations
+from graphiti_core.driver.operations.community_edge_ops import CommunityEdgeOperations
+from graphiti_core.driver.operations.has_episode_edge_ops import HasEpisodeEdgeOperations
+from graphiti_core.driver.operations.next_episode_edge_ops import NextEpisodeEdgeOperations
+from graphiti_core.driver.surrealdb.operations.edge_ops import (
+    SurrealDBEntityEdgeOperations, SurrealDBEpisodicEdgeOperations,
+    SurrealDBCommunityEdgeOperations, SurrealDBHasEpisodeEdgeOperations,
+    SurrealDBNextEpisodeEdgeOperations,
+)
 from graphiti_core.driver.operations.episode_node_ops import EpisodeNodeOperations
 from graphiti_core.driver.operations.saga_node_ops import SagaNodeOperations
 from graphiti_core.driver.surrealdb.operations.node_ops import (
@@ -82,6 +92,11 @@ class SurrealDBDriver(GraphDriver):
         self._episode_node_ops = SurrealDBEpisodeNodeOperations()
         self._community_node_ops = SurrealDBCommunityNodeOperations()
         self._saga_node_ops = SurrealDBSagaNodeOperations()
+        self._entity_edge_ops = SurrealDBEntityEdgeOperations()
+        self._episodic_edge_ops = SurrealDBEpisodicEdgeOperations()
+        self._community_edge_ops = SurrealDBCommunityEdgeOperations()
+        self._has_episode_edge_ops = SurrealDBHasEpisodeEdgeOperations()
+        self._next_episode_edge_ops = SurrealDBNextEpisodeEdgeOperations()
 
     @property
     def entity_node_ops(self) -> EntityNodeOperations:
@@ -98,6 +113,26 @@ class SurrealDBDriver(GraphDriver):
     @property
     def saga_node_ops(self) -> SagaNodeOperations:
         return self._saga_node_ops
+
+    @property
+    def entity_edge_ops(self) -> EntityEdgeOperations:
+        return self._entity_edge_ops
+
+    @property
+    def episodic_edge_ops(self) -> EpisodicEdgeOperations:
+        return self._episodic_edge_ops
+
+    @property
+    def community_edge_ops(self) -> CommunityEdgeOperations:
+        return self._community_edge_ops
+
+    @property
+    def has_episode_edge_ops(self) -> HasEpisodeEdgeOperations:
+        return self._has_episode_edge_ops
+
+    @property
+    def next_episode_edge_ops(self) -> NextEpisodeEdgeOperations:
+        return self._next_episode_edge_ops
 
     async def _ensure_connected(self) -> None:
         if self._closed:
