@@ -11,9 +11,11 @@ import os
 from uuid import uuid4
 
 import pytest
+import pytest_asyncio
 
 from graphiti_core.driver.surrealdb_driver import SurrealDBDriver
 from graphiti_core.nodes import EntityNode
+from graphiti_core.search.search_filters import SearchFilters
 
 
 pytestmark = [
@@ -22,7 +24,7 @@ pytestmark = [
 ]
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def driver():
     url = os.getenv("SURREALDB_TEST_URL", "ws://localhost:8000/rpc")
     db = SurrealDBDriver(
@@ -58,9 +60,7 @@ async def test_entity_node_round_trip_and_similarity_search(driver: SurrealDBDri
     results = await driver.search_interface.node_similarity_search(
         driver,
         [1.0, 0.0, 0.0],
-        search_filter=__import__(
-            "graphiti_core.search.search_filters", fromlist=["SearchFilters"]
-        ).SearchFilters(),
+        search_filter=SearchFilters(),
         group_ids=[node.group_id],
         min_score=0.99,
     )
