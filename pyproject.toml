@@ -77,6 +77,7 @@ constraint-dependencies = ["pillow>=13.0.0"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+markers = ["integration: requires a running SurrealDB instance"]
 
 [tool.ruff]
 line-length = 100
